@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cliques Detalhados</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body { padding-top: 20px; }
+        .container { max-width: 1300px; } /* Aumentei mais um pouco para o novo link */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 0.9em; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">Cliques Detalhados</h1>
+        <p><a href="{{ url_for('index') }}" class="btn btn-secondary">Voltar para Criar Links</a></p>
+
+        {% if cliques %}
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>IP</th>
+                            <th>Navegador</th>
+                            <th>Plataforma</th>
+                            <th>OS</th>
+                            <th>Campanha</th>
+                            <th>Código</th>
+                            <th>Cidade</th>
+                            <th>Estado</th>
+                            <th>País</th>
+                            <th>Ver no Mapa</th> {# Nova coluna #}
+                            <th>Link Original</th>
+                            <th>Referer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for clique in cliques %}
+                            <tr>
+                                <td>{{ clique.data_hora }}</td>
+                                <td>{{ clique.ip }}</td>
+                                <td>{{ clique.navegador }}</td>
+                                <td>{{ clique.plataforma }}</td>
+                                <td>{{ clique.os }}</td>
+                                <td>{{ clique.campanha }}</td>
+                                <td>{{ clique.codigo }}</td>
+                                <td>{{ clique.cidade }}</td>
+                                <td>{{ clique.estado }}</td>
+                                <td>{{ clique.pais }}</td>
+                                <td>
+                                    {% if clique.Maps_link != 'N/A' %}
+                                        <a href="{{ clique.Maps_link }}" target="_blank">Mapa</a> {# Exibe o link #}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td><a href="{{ clique.link_original }}" target="_blank">{{ clique.link_original }}</a></td>
+                                <td>{{ clique.referer }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>Nenhum clique registrado ainda.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
