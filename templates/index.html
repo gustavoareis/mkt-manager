@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Campanhas</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body { padding-top: 20px; padding-bottom: 40px; }
+        .container { max-width: 900px; }
+        .card { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Gerenciador de Campanhas</h1>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('index') }}" method="POST">
+            <div class="card">
+                <div class="card-header font-weight-bold">
+                    1. Definição da Campanha
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="campanha">Nome da Campanha:</label>
+                        <input type="text" class="form-control" id="campanha" name="campanha" list="lista-campanhas" placeholder="Digite um nome novo ou selecione um existente" required>
+                        <datalist id="lista-campanhas">
+                            {% for campanha in todas_campanhas %}
+                                <option value="{{ campanha }}">
+                            {% endfor %}
+                        </datalist>
+                        <small class="form-text text-muted">Ao escolher uma campanha existente, você adicionará novos links e atualizará os dados dela.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="observacoes">Observações:</label>
+                        <textarea class="form-control" id="observacoes" name="observacoes" rows="2" placeholder="Notas internas sobre a campanha (opcional)"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header font-weight-bold">
+                    2. Links Originais
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="link_original_1">Link Original #1:</label>
+                        <input type="url" class="form-control" id="link_original_1" name="link_original_1" placeholder="https://exemplo.com/link1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="link_original_2">Link Original #2:</label>
+                        <input type="url" class="form-control" id="link_original_2" name="link_original_2" placeholder="https://exemplo.com/link2 (opcional)">
+                    </div>
+                    <div class="form-group">
+                        <label for="link_original_3">Link Original #3:</label>
+                        <input type="url" class="form-control" id="link_original_3" name="link_original_3" placeholder="https://exemplo.com/link3 (opcional)">
+                    </div>
+                    <div class="form-group">
+                        <label for="link_original_4">Link Original #4:</label>
+                        <input type="url" class="form-control" id="link_original_4" name="link_original_4" placeholder="https://exemplo.com/link4 (opcional)">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header font-weight-bold">
+                    3. Conteúdo e Nível
+                </div>
+                <div class="card-body">
+                     <div class="form-group">
+                        <label for="template_email">Corpo do Texto (Template de E-mail):</label>
+                        <textarea class="form-control" id="template_email" name="template_email" rows="10" placeholder="Cole aqui o corpo do seu e-mail. Use os placeholders [link1], [link2], etc. (opcional)"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="nivel">Nível da Campanha:</label>
+                        <input type="number" class="form-control" id="nivel" name="nivel" min="1" placeholder="Digite o nível da campanha" required>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-success btn-lg btn-block">Salvar Campanha</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
