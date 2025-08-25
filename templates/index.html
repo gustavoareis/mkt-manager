@@ -68,7 +68,7 @@
                     </div>
                     <div class="form-group">
                         <label for="link_original_4">Link Original #4:</label>
-                        <input type="url" class="form-control" id="link_original_4" name="link_original_4" placeholder="https://exemplo.com/link4 (opcional)">
+                        <input type="url" class="form-control" id="link_original_4" name="link_control" placeholder="https://exemplo.com/link4 (opcional)">
                     </div>
                 </div>
             </div>
@@ -79,6 +79,10 @@
                 </div>
                 <div class="card-body">
                      <div class="form-group">
+                        <label for="assunto">Assunto:</label>
+                        <input type="text" class="form-control" id="assunto" name="assunto" placeholder="Digite o assunto do e-mail (opcional)">
+                    </div>
+                     <div class="form-group">
                         <label for="template">Corpo do Texto (Template de E-mail):</label>
                         <textarea class="form-control" id="template" name="template" rows="10" placeholder="Cole aqui o corpo do seu e-mail. Use os placeholders [link1], [link2], etc. (opcional)"></textarea>
                     </div>
@@ -88,6 +92,7 @@
                     </div>
                 </div>
             </div>
+            
             <button type="submit" class="btn btn-success btn-lg btn-block">Salvar Campanha</button>
         </form>
     </div>

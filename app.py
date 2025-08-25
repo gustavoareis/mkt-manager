@@ -82,6 +82,7 @@ def index():
         observacoes = request.form.get('observacoes')
         fase = request.form.get('fase')
         template = request.form.get('template')
+        assunto = request.form.get('assunto') # <-- 1. ADICIONADO: Captura o novo campo
         
         links_originais = [
             request.form.get('link_original_1'),
@@ -128,6 +129,7 @@ def index():
             tabela2 = {
                 'template': template,
                 'fase': fase,
+                'assunto': assunto, # <-- 2. ADICIONADO: Inclui o assunto para inserção
                 'id_campanha': new_campaign_id
             }
             supabase.from_('fases').insert(tabela2).execute()
@@ -157,6 +159,8 @@ def index():
     if supabase:
         try:
             # Busca campanhas + fases (template, fase)
+            # Para exibir o assunto na listagem, você precisaria adicioná-lo aqui também
+            # Ex: .select('..., fases(template, fase, assunto)')
             response = supabase.from_('campanhas') \
                 .select('id_campanha, campanha, observacoes, data_criacao, fases(template, fase)') \
                 .order('campanha') \
