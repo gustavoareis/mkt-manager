@@ -24,7 +24,7 @@
                     <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
                         {{ message }}
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
+                            <span aria-hidden="true">×</span>
                         </button>
                     </div>
                 {% endfor %}
@@ -39,13 +39,8 @@
                 <div class="card-body">
                     <div class="form-group">
                         <label for="campanha">Nome da Campanha:</label>
-                        <input type="text" class="form-control" id="campanha" name="campanha" list="lista-campanhas" placeholder="Digite um nome novo ou selecione um existente" required>
-                        <datalist id="lista-campanhas">
-                            {% for campanha in todas_campanhas %}
-                                <option value="{{ campanha }}">
-                            {% endfor %}
-                        </datalist>
-                        <small class="form-text text-muted">Ao escolher uma campanha existente, você adicionará novos links e atualizará os dados dela.</small>
+                        <input type="text" class="form-control" id="campanha" name="campanha" placeholder="Digite o nome da campanha" required>
+                        <small class="form-text text-muted">Este será o nome da nova campanha.</small>
                     </div>
                     <div class="form-group">
                         <label for="observacoes">Observações:</label>
@@ -80,20 +75,19 @@
 
             <div class="card">
                 <div class="card-header font-weight-bold">
-                    3. Conteúdo e Nível
+                    3. Conteúdo e Fase
                 </div>
                 <div class="card-body">
                      <div class="form-group">
-                        <label for="template_email">Corpo do Texto (Template de E-mail):</label>
-                        <textarea class="form-control" id="template_email" name="template_email" rows="10" placeholder="Cole aqui o corpo do seu e-mail. Use os placeholders [link1], [link2], etc. (opcional)"></textarea>
+                        <label for="template">Corpo do Texto (Template de E-mail):</label>
+                        <textarea class="form-control" id="template" name="template" rows="10" placeholder="Cole aqui o corpo do seu e-mail. Use os placeholders [link1], [link2], etc. (opcional)"></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="nivel">Nível da Campanha:</label>
-                        <input type="number" class="form-control" id="nivel" name="nivel" min="1" placeholder="Digite o nível da campanha" required>
+                        <label for="fase">Fase da Campanha:</label>
+                        <input type="number" class="form-control" id="fase" name="fase" min="1" placeholder="Digite a fase da campanha" required>
                     </div>
                 </div>
             </div>
-            
             <button type="submit" class="btn btn-success btn-lg btn-block">Salvar Campanha</button>
         </form>
     </div>

@@ -115,34 +115,33 @@ def index():
             return redirect(url_for('index'))
 
         try:
-            # 1) Inserir na TABELA1
+            # 1) Inserir na tabela CAMPANHAS
             dados_nova_campanha = {
                 'campanha': nome_campanha_form,
                 'observacoes': observacoes,
-                'data_criacao': datetime.now().isoformat()
+                'data_criacao': datetime.now().date().isoformat()
             }
-            response = supabase.from_('tabela1').insert(dados_nova_campanha).execute()
-            new_campaign_id = response.data[0]['id']
+            response = supabase.from_('campanhas').insert(dados_nova_campanha).execute()
+            new_campaign_id = response.data[0]['id_campanha']
 
-            # 2) Inserir na TABELA2
-            dados_tabela2 = {
-                'campanha': nome_campanha_form,
+            # 2) Inserir na tabela FASES
+            tabela2 = {
                 'template': template,
                 'fase': fase,
                 'id_campanha': new_campaign_id
             }
-            supabase.from_('tabela2').insert(dados_tabela2).execute()
+            supabase.from_('fases').insert(tabela2).execute()
 
-            # 3) Inserir na TABELA3 (links)
+            # 3) Inserir na tabela LINKS
             dados_links_insert = []
             for link_info in links_do_projeto:
                 dados_links_insert.append({
                     'base_link': link_info['link_mascarado'],
                     'placeholder_link': link_info['placeholder'],
                     'url_destino': link_info['link_original'],
-                    'id_link': new_campaign_id
+                    'id_campanha': new_campaign_id
                 })
-            supabase.from_('tabela3').insert(dados_links_insert).execute()
+            supabase.from_('links').insert(dados_links_insert).execute()
 
             flash("Nova campanha salva com sucesso!", 'success')
 
@@ -157,8 +156,12 @@ def index():
     todas_campanhas = []
     if supabase:
         try:
-            response = supabase.from_('tabela1').select('campanha').order('campanha').execute()
-            todas_campanhas = [item['campanha'] for item in response.data]
+            # Busca campanhas + fases (template, fase)
+            response = supabase.from_('campanhas') \
+                .select('id_campanha, campanha, observacoes, data_criacao, fases(template, fase)') \
+                .order('campanha') \
+                .execute()
+            todas_campanhas = response.data
         except Exception as e:
             print(f"Erro ao buscar campanhas: {e}")
             
@@ -177,15 +180,15 @@ def rastrear_e_redirecionar(campanha_rastreavel):
         return 'Erro interno do servidor', 500
     
     try:
-        # Busca na tabela3
-        response = supabase.from_('tabela3') \
-            .select('url_destino, id_link, tabela1(campanha)') \
+        # Busca na tabela LINKS com relação CAMPANHAS
+        response = supabase.from_('links') \
+            .select('url_destino, id_campanha, campanhas(campanha)') \
             .eq('base_link', f"{Config.BASE_DOMAIN}/{Config.TRACKING_PATH_PREFIX}/{campanha_rastreavel}") \
             .single().execute()
 
         link_data = response.data
         url_destino = link_data['url_destino']
-        campanha_nome = link_data['tabela1']['campanha']
+        campanha_nome = link_data['campanhas']['campanha']
 
     except Exception as e:
         print(f"Erro ao buscar link no Supabase: {e}")
@@ -196,11 +199,17 @@ def rastrear_e_redirecionar(campanha_rastreavel):
         ip_address = request.remote_addr
         geo_data = get_geolocation_from_ip(ip_address)
         dados_do_clique = {
-            'data_hora': datetime.now().isoformat(), 'ip': ip_address,
-            'navegador': request.user_agent.browser, 'plataforma': request.user_agent.platform,
-            'os': request.user_agent.platform, 'campanha': campanha_nome,
-            'link_original': url_destino, 'referer': request.referrer or 'Direto',
-            'cidade': geo_data['cidade'], 'estado': geo_data['estado'], 'pais': geo_data['pais'],
+            'data_hora': datetime.now().isoformat(), 
+            'ip': ip_address,
+            'navegador': request.user_agent.browser, 
+            'plataforma': request.user_agent.platform,
+            'os': request.user_agent.platform, 
+            'campanha': campanha_nome,
+            'link_original': url_destino, 
+            'referer': request.referrer or 'Direto',
+            'cidade': geo_data['cidade'], 
+            'estado': geo_data['estado'], 
+            'pais': geo_data['pais'],
             'maps_link': geo_data['Maps_link'],
             'observacoes': f'Rastreamento para a campanha {campanha_nome}'
         }
