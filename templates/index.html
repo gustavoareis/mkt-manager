@@ -35,15 +35,20 @@
       .remove-link-btn {
         white-space: nowrap;
       }
+      .header-buttons {
+        display: flex;
+        gap: 10px; /* Espaçamento entre os botões */
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Gerenciador de Campanhas</h1>
-        <a href="{{ url_for('logout') }}" class="btn btn-outline-danger"
-          >Sair (Logout)</a
-        >
+        <div class="header-buttons">
+          <a href="{{ url_for('cliques_page') }}" class="btn btn-info">Ver Cliques</a>
+          <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Sair</a>
+        </div>
       </div>
 
       {% with messages = get_flashed_messages(with_categories=true) %} {% if
@@ -67,7 +72,7 @@
       <form method="POST">
         <div class="card">
           <div class="card-header font-weight-bold">
-            1. Definição da Campanha
+            1. Criar Nova Campanha
           </div>
           <div class="card-body">
             <div class="form-group">
@@ -146,11 +151,16 @@
               campanha.data_criacao }}</small
             >
           </div>
-          <a
-            href="{{ url_for('edit', id_campanha=campanha.id_campanha) }}"
-            class="btn btn-secondary"
-            >Editar</a
-          >
+          <div class="d-flex align-items-center">
+            <a
+              href="{{ url_for('edit', id_campanha=campanha.id_campanha) }}"
+              class="btn btn-secondary btn-sm"
+              >Editar</a
+            >
+            <form method="POST" action="{{ url_for('delete', id_campanha=campanha.id_campanha) }}" onsubmit="return confirm('Tem certeza que deseja remover esta campanha? Todos os templates e links associados serão perdidos permanentemente.');" class="ml-2">
+              <button type="submit" class="btn btn-danger btn-sm">Remover</button>
+            </form>
+          </div>
         </div>
         {% else %}
         <div class="list-group-item">
@@ -161,7 +171,7 @@
         </div>
         {% endfor %}
       </div>
-      </div>
+    </div>
 
     <script>
       let templateCount = 0;

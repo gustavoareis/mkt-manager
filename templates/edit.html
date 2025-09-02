@@ -109,7 +109,8 @@
 </div>
 
 <script>
-    let templateCount = {{ campanha.templates|length }};
+    let templateCount = parseInt("{{ campanha.templates|length }}");
+
     function addTemplate() {
         templateCount++;
         const card = document.createElement("div");
@@ -134,8 +135,18 @@
         addLinkToCard(card);
         renumberTemplates();
     }
-    function removeTemplate(btn) { const card = btn.closest(".template-card"); card.remove(); renumberTemplates(); }
-    function addLinkDynamic(el) { const card = el.closest(".template-card"); addLinkToCard(card); }
+    
+    function removeTemplate(btn) { 
+        const card = btn.closest(".template-card"); 
+        card.remove(); 
+        renumberTemplates(); 
+    }
+    
+    function addLinkDynamic(el) { 
+        const card = el.closest(".template-card"); 
+        addLinkToCard(card); 
+    }
+    
     function addLinkToCard(card) {
         const linksDiv = card.querySelector(".links-container");
         const row = document.createElement("div");
@@ -145,18 +156,26 @@
         const templateIndex = parseInt(card.dataset.templateIndex);
         renumberLinks(card, templateIndex);
     }
+    
+    // As funções abaixo não estavam mais dentro de uma definição de função
+    // por causa dos comentários. Agora está corrigido.
     function removeLink(btn) {
         const card = btn.closest(".template-card");
-        const linksDiv = card.querySelector(".links-container");
-        if (linksDiv.querySelectorAll(".link-row").length < 1) { // Permite remover o ultimo
-             btn.closest(".link-row").remove();
-        } else if (linksDiv.querySelectorAll(".link-row").length <= 1) {
-            alert("Pelo menos 1 link por template."); return;
+        const linksContainer = card.querySelector(".links-container");
+        const allLinks = linksContainer.querySelectorAll(".link-row");
+
+        if (allLinks.length <= 1) {
+            alert("Pelo menos um link é necessário por template.");
+            return;
         }
-        btn.closest(".link-row").remove();
+
+        const linkRowToRemove = btn.closest(".link-row");
+        linkRowToRemove.remove();
+
         const templateIndex = parseInt(card.dataset.templateIndex);
         renumberLinks(card, templateIndex);
     }
+
     function renumberTemplates() {
         const cards = document.querySelectorAll(".template-card");
         cards.forEach((card, idx) => {
@@ -171,6 +190,7 @@
         });
         templateCount = cards.length;
     }
+
     function renumberLinks(card, templateIndex) {
         const rows = card.querySelectorAll(".link-row");
         rows.forEach((row, idx) => {
@@ -179,10 +199,12 @@
             const input = row.querySelector(".link-input");
             input.name = `link_${templateIndex}_${linkIdx}`;
             input.placeholder = `https://exemplo.com (Link #${linkIdx})`;
-            input.required = true; // Todo link deve ter uma URL
+            input.required = true;
         });
     }
+
     document.getElementById("add-template-btn").addEventListener("click", addTemplate);
+    
     window.addEventListener('DOMContentLoaded', (event) => {
         renumberTemplates();
     });
