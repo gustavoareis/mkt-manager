@@ -5,7 +5,7 @@ from supabase import create_client, Client
 import geocoder
 
 # ==============================
-# CONFIGURAÇÕES
+# CONFIG
 # ==============================
 class Config:
     SECRET_KEY = os.urandom(24)
@@ -16,7 +16,7 @@ class Config:
     IPINFO_TOKEN = os.getenv("IPINFO_TOKEN", None)
 
 # ==============================
-# SUPABASE CLIENT
+# SUPABASE
 # ==============================
 def get_supabase_client() -> Client:
     try:
@@ -29,10 +29,7 @@ def get_supabase_client() -> Client:
 # GEOLOCALIZAÇÃO
 # ==============================
 def get_geolocation_from_ip(ip_address):
-    cidade = 'N/A'
-    estado = 'N/A'
-    pais = 'N/A'
-    Maps_link = 'N/A'
+    cidade = estado = pais = Maps_link = 'N/A'
     try:
         if ip_address in ['127.0.0.1', 'localhost'] or ip_address.startswith(('192.168.', '10.', '172.16.')):
             return {'cidade': cidade, 'estado': estado, 'pais': pais, 'Maps_link': Maps_link}
@@ -48,7 +45,7 @@ def get_geolocation_from_ip(ip_address):
     return {'cidade': cidade, 'estado': estado, 'pais': pais, 'Maps_link': Maps_link}
 
 # ==============================
-# APP FLASK
+# FLASK APP
 # ==============================
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -70,14 +67,12 @@ def protect_routes():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        if username == "admin" and password == "admin":
+        if request.form['username'] == "admin" and request.form['password'] == "admin":
             session['logged_in'] = True
-            session['username'] = username
+            session['username'] = "admin"
             return redirect(url_for('index'))
         else:
-            flash('Usuário ou senha inválidos.', 'danger')
+            flash("Usuário ou senha inválidos.", "danger")
     return render_template('login.html')
 
 @app.route('/logout')
@@ -86,127 +81,133 @@ def logout():
     return redirect(url_for('login'))
 
 # ==============================
-# CRIAÇÃO DE CAMPANHAS
+# INDEX / CRIAR CAMPANHA
 # ==============================
 @app.route('/', methods=['GET', 'POST'])
 def index():
     supabase = get_supabase_client()
     if not supabase:
-        flash("Erro ao conectar com o banco de dados.", 'danger')
-        return render_template('index.html', todas_campanhas=[])
+        flash("Erro ao conectar com o banco de dados.", "danger")
+        return render_template("index.html", todas_campanhas=[])
 
     if request.method == 'POST':
-        nome_campanha_form = request.form.get('campanha')
-        observacoes = request.form.get('observacoes')
-        fase_campanha = int(request.form.get('fase'))  # <-- CONVERTIDO PARA INTEIRO
-        template = request.form.get('template')
-        assunto = request.form.get('assunto')
-
-        links_originais = [
-            request.form.get('link_original_1'),
-            request.form.get('link_original_2'),
-            request.form.get('link_original_3'),
-            request.form.get('link_original_4')
-        ]
-
-        if not nome_campanha_form:
-            flash("O campo 'Nome da Campanha' é obrigatório!", 'danger')
-            return redirect(url_for('index'))
-
-        links_validos = [l for l in links_originais if l]
-        if not links_validos:
-            flash("É necessário preencher pelo menos um link!", 'danger')
-            return redirect(url_for('index'))
-
-        links_do_projeto = []
-        for i, link in enumerate(links_validos, 1):
-            rastreavel = f"{nome_campanha_form.replace(' ', '_')}_{i}"
-            mascarado = f"{Config.BASE_DOMAIN}/{Config.TRACKING_PATH_PREFIX}/{rastreavel}"
-            links_do_projeto.append({'link_original': link, 'link_mascarado': mascarado, 'placeholder': f'[link{i}]'})
-
         try:
+            campanha_nome = request.form.get("campanha")
+            observacoes = request.form.get("observacoes")
+            tipo_campanha = request.form.get("tipo_campanha")
+
+            if not campanha_nome or not tipo_campanha:
+                flash("Nome e tipo da campanha são obrigatórios!", "danger")
+                return redirect(url_for("index"))
+
             # Inserir campanha
-            dados_campanha = {'campanha': nome_campanha_form, 'observacoes': observacoes, 'data_criacao': datetime.now().date().isoformat()}
-            resp = supabase.from_('campanhas').insert(dados_campanha).execute()
-            new_id = resp.data[0]['id_campanha']
+            dados_campanha = {
+                "campanha": campanha_nome,
+                "observacoes": observacoes,
+                "data_criacao": datetime.now().date().isoformat(),
+                "tipo_campanha": tipo_campanha
+            }
+            resp = supabase.from_("campanhas").insert(dados_campanha).execute()
+            id_campanha = resp.data[0]["id_campanha"]
 
-            # Inserir fase
-            tabela_fase = {'template': template, 'fase_campanha': fase_campanha, 'assunto': assunto, 'id_campanha': new_id}
-            supabase.from_('fases').insert(tabela_fase).execute()
+            # Processar templates
+            template_index = 1
+            while f"template_{template_index}" in request.form:
+                corpo = request.form.get(f"template_{template_index}")
+                assunto = request.form.get(f"assunto_{template_index}")
+                fase = request.form.get(f"fase_{template_index}")
 
-            # Inserir links COM fase_links
-            dados_links = [
-                {
-                    'base_link': l['link_mascarado'],
-                    'placeholder_link': l['placeholder'],
-                    'url_destino': l['link_original'],
-                    'id_campanha': new_id,
-                    'fase_links': fase_campanha  # <-- CORREÇÃO
-                } for l in links_do_projeto
-            ]
-            supabase.from_('links').insert(dados_links).execute()
+                if corpo and fase:
+                    resp_t = supabase.from_("templates").insert({
+                        "id_campanha": id_campanha,
+                        "assunto": assunto,
+                        "corpo": corpo,
+                        "fase": int(fase)
+                    }).execute()
+                    id_template = resp_t.data[0]["id_template"]
 
-            flash("Nova campanha salva com sucesso!", 'success')
+                    # Links deste template
+                    link_index = 1
+                    while f"link_{template_index}_{link_index}" in request.form:
+                        url_destino = request.form.get(f"link_{template_index}_{link_index}")
+                        if url_destino:
+                            rastreavel = f"{campanha_nome.replace(' ', '_')}_T{template_index}_L{link_index}"
+                            mascarado = f"{Config.BASE_DOMAIN}/{Config.TRACKING_PATH_PREFIX}/{rastreavel}"
+
+                            supabase.from_("links").insert({
+                                "base_link": mascarado,
+                                "url_destino": url_destino,
+                                "placeholder_link": f"[link{link_index}]",
+                                "id_campanha": id_campanha,
+                                "id_template": id_template
+                            }).execute()
+                        link_index += 1
+                template_index += 1
+
+            flash("Campanha criada com sucesso!", "success")
+
         except Exception as e:
-            print(f"Erro ao salvar no Supabase: {e}")
-            flash(f"Erro ao salvar a campanha: {e}", 'danger')
+            print(f"Erro ao salvar campanha: {e}")
+            flash("Erro ao salvar campanha.", "danger")
 
-        return redirect(url_for('index'))
+        return redirect(url_for("index"))
 
-    # --- GET ---
-    todas_campanhas = []
+    # GET -> listar campanhas
+    campanhas = []
     try:
-        resp = supabase.from_('campanhas').select('id_campanha, campanha, observacoes, data_criacao, fases(template, fase_campanha, assunto)').order('campanha').execute()
-        todas_campanhas = resp.data
+        resp = supabase.from_("campanhas").select("id_campanha, campanha, tipo_campanha, data_criacao, templates(id_template, fase, assunto, corpo, links(base_link,url_destino))").order("id_campanha").execute()
+        campanhas = resp.data
     except Exception as e:
-        print(f"Erro ao buscar campanhas: {e}")
+        print("Erro ao buscar campanhas:", e)
 
-    return render_template('index.html', todas_campanhas=todas_campanhas)
+    return render_template("index.html", todas_campanhas=campanhas)
 
 # ==============================
-# RASTREAMENTO
+# TRACKING
 # ==============================
-@app.route(f'/{Config.TRACKING_PATH_PREFIX}/<campanha_rastreavel>', methods=['GET'])
-def rastrear_e_redirecionar(campanha_rastreavel):
+@app.route(f'/{Config.TRACKING_PATH_PREFIX}/<rastreador>', methods=['GET'])
+def rastrear_e_redirecionar(rastreador):
     supabase = get_supabase_client()
     if not supabase:
-        return 'Erro interno do servidor', 500
-    try:
-        resp = supabase.from_('links').select('url_destino, id_campanha, campanhas(campanha)').eq('base_link', f"{Config.BASE_DOMAIN}/{Config.TRACKING_PATH_PREFIX}/{campanha_rastreavel}").single().execute()
-        link_data = resp.data
-        url_destino = link_data['url_destino']
-        campanha_nome = link_data['campanhas']['campanha']
-    except Exception as e:
-        print(f"Erro ao buscar link no Supabase: {e}")
-        return 'Link não reconhecido', 400
+        return "Erro interno", 500
 
-    # Registrar clique
     try:
+        resp = supabase.from_("links").select("url_destino, campanhas(campanha)").eq("base_link", f"{Config.BASE_DOMAIN}/{Config.TRACKING_PATH_PREFIX}/{rastreador}").single().execute()
+        link_data = resp.data
+        if not link_data:
+            return "Link não encontrado", 404
+
+        destino = link_data["url_destino"]
+        campanha_nome = link_data["campanhas"]["campanha"]
+
+        # registrar clique
         ip = request.remote_addr
         geo = get_geolocation_from_ip(ip)
-        dados_clique = {
-            'data_hora': datetime.now().isoformat(),
-            'ip': ip,
-            'navegador': request.user_agent.browser,
-            'plataforma': request.user_agent.platform,
-            'os': request.user_agent.platform,
-            'campanha': campanha_nome,
-            'link_original': url_destino,
-            'referer': request.referrer or 'Direto',
-            'cidade': geo['cidade'],
-            'estado': geo['estado'],
-            'pais': geo['pais'],
-            'maps_link': geo['Maps_link'],
-            'observacoes': f'Rastreamento para a campanha {campanha_nome}'
+        clique = {
+            "data_hora": datetime.now().isoformat(),
+            "ip": ip,
+            "navegador": request.user_agent.browser,
+            "plataforma": request.user_agent.platform,
+            "os": request.user_agent.platform,
+            "campanha": campanha_nome,
+            "link_original": destino,
+            "referer": request.referrer or "Direto",
+            "cidade": geo["cidade"],
+            "estado": geo["estado"],
+            "pais": geo["pais"],
+            "maps_link": geo["Maps_link"],
+            "observacoes": f"Rastreamento {campanha_nome}"
         }
-        supabase.from_('cliques').insert([dados_clique]).execute()
-    except Exception as e:
-        print(f"Erro ao registrar clique: {e}")
+        supabase.from_("cliques").insert([clique]).execute()
 
-    return redirect(url_destino, code=302)
+        return redirect(destino, code=302)
+
+    except Exception as e:
+        print("Erro rastrear:", e)
+        return "Erro no rastreamento", 500
 
 # ==============================
 # RUN
 # ==============================
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5002)
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=5002)
