@@ -134,5 +134,5 @@ Este projeto está sob a licença [MIT](LICENSE).
 
 ---
 
-**Autor**: Gustavo Almeida  
-**Contato**: [seu-email@example.com](mailto:seu-email@example.com)
+**Autor**: Gustavo Almeida
+
