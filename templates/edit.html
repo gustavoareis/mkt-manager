@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <title>Editando: {{ campanha.campanha }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <style>
+        body { padding-top: 20px; padding-bottom: 50px; }
+        .container { max-width: 1000px; }
+        .card { margin-bottom: 20px; }
+        .template-card .card-header { display: flex; justify-content: space-between; align-items: center; }
+        .link-row { gap: 0.5rem; }
+        .link-label { min-width: 80px; display: flex; align-items: center; }
+        .remove-link-btn { white-space: nowrap; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Editando: {{ campanha.campanha }}</h1>
+        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %} 
+    {% if messages %} 
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">×</span>
+        </button>
+    </div>
+    {% endfor %} 
+    {% endif %} 
+    {% endwith %}
+
+    <form method="POST">
+        <div class="card">
+            <div class="card-header font-weight-bold">1. Definição da Campanha</div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label>Nome da campanha</label>
+                    <input type="text" class="form-control" name="campanha" value="{{ campanha.campanha }}" required />
+                </div>
+                <div class="form-group">
+                    <label>Observações</label>
+                    <textarea class="form-control" name="observacoes" rows="2">{{ campanha.observacoes }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label class="d-block">Tipo de Campanha</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="tipo_campanha" id="tipo_email" value="email" {% if campanha.tipo_campanha == 'email' %}checked{% endif %} required />
+                        <label class="form-check-label" for="tipo_email">Email</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="tipo_campanha" id="tipo_whatsapp" value="whatsapp" {% if campanha.tipo_campanha == 'whatsapp' %}checked{% endif %} />
+                        <label class="form-check-label" for="tipo_whatsapp">WhatsApp</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="templates-container">
+            {% for template in campanha.templates %}
+            <div class="card template-card" data-template-index="{{ loop.index }}">
+                <div class="card-header">
+                    <span class="template-title">Template #{{ loop.index }}</span>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeTemplate(this)">Remover template</button>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Assunto</label>
+                        <input type="text" class="form-control assunto-input" name="assunto_{{ loop.index }}" value="{{ template.assunto }}" placeholder="Opcional">
+                    </div>
+                    <div class="form-group">
+                        <label>Corpo do template</label>
+                        <textarea class="form-control corpo-textarea" name="template_{{ loop.index }}" rows="4">{{ template.corpo }}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Fase</label>
+                        <input type="number" class="form-control fase-input" name="fase_{{ loop.index }}" value="{{ template.fase }}" min="1" required>
+                    </div>
+                    <div class="mb-2 d-flex justify-content-between align-items-center">
+                        <strong>Links deste template</strong>
+                        <button type="button" class="btn btn-sm btn-info add-link-btn" onclick="addLinkDynamic(this)">+ Link</button>
+                    </div>
+                    <div class="links-container" id="links-{{ loop.index }}">
+                        {% for link in template.links %}
+                        <div class="form-row align-items-center link-row">
+                            <div class="col-auto link-label"><label>Link #{{ loop.index }}</label></div>
+                            <div class="col">
+                                <input type="url" class="form-control link-input" name="link_{{ template.fase }}_{{ loop.index }}" value="{{ link.url_destino }}" required>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-sm btn-outline-danger remove-link-btn" onclick="removeLink(this)">Remover</button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn btn-primary mb-3" id="add-template-btn">+ Adicionar Template</button>
+
+        <button type="submit" class="btn btn-success btn-lg btn-block">Salvar Alterações</button>
+    </form>
+</div>
+
+<script>
+    let templateCount = {{ campanha.templates|length }};
+    function addTemplate() {
+        templateCount++;
+        const card = document.createElement("div");
+        card.className = "card template-card";
+        card.dataset.templateIndex = String(templateCount);
+        card.innerHTML = `
+            <div class="card-header">
+                <span class="template-title">Template #${templateCount}</span>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeTemplate(this)">Remover template</button>
+            </div>
+            <div class="card-body">
+                <div class="form-group"><label>Assunto</label><input type="text" class="form-control assunto-input" name="assunto_${templateCount}" placeholder="Opcional"></div>
+                <div class="form-group"><label>Corpo do template</label><textarea class="form-control corpo-textarea" name="template_${templateCount}" rows="4" placeholder="Use [link1], [link2], ..."></textarea></div>
+                <div class="form-group"><label>Fase</label><input type="number" class="form-control fase-input" name="fase_${templateCount}" min="1" required></div>
+                <div class="mb-2 d-flex justify-content-between align-items-center">
+                    <strong>Links deste template</strong>
+                    <button type="button" class="btn btn-sm btn-info add-link-btn" onclick="addLinkDynamic(this)">+ Link</button>
+                </div>
+                <div class="links-container" id="links-${templateCount}"></div>
+            </div>`;
+        document.getElementById("templates-container").appendChild(card);
+        addLinkToCard(card);
+        renumberTemplates();
+    }
+    function removeTemplate(btn) { const card = btn.closest(".template-card"); card.remove(); renumberTemplates(); }
+    function addLinkDynamic(el) { const card = el.closest(".template-card"); addLinkToCard(card); }
+    function addLinkToCard(card) {
+        const linksDiv = card.querySelector(".links-container");
+        const row = document.createElement("div");
+        row.className = "form-row align-items-center link-row";
+        row.innerHTML = `<div class="col-auto link-label"><label>Link #</label></div><div class="col"><input type="url" class="form-control link-input" placeholder="https://exemplo.com"></div><div class="col-auto"><button type="button" class="btn btn-sm btn-outline-danger remove-link-btn" onclick="removeLink(this)">Remover</button></div>`;
+        linksDiv.appendChild(row);
+        const templateIndex = parseInt(card.dataset.templateIndex);
+        renumberLinks(card, templateIndex);
+    }
+    function removeLink(btn) {
+        const card = btn.closest(".template-card");
+        const linksDiv = card.querySelector(".links-container");
+        if (linksDiv.querySelectorAll(".link-row").length < 1) { // Permite remover o ultimo
+             btn.closest(".link-row").remove();
+        } else if (linksDiv.querySelectorAll(".link-row").length <= 1) {
+            alert("Pelo menos 1 link por template."); return;
+        }
+        btn.closest(".link-row").remove();
+        const templateIndex = parseInt(card.dataset.templateIndex);
+        renumberLinks(card, templateIndex);
+    }
+    function renumberTemplates() {
+        const cards = document.querySelectorAll(".template-card");
+        cards.forEach((card, idx) => {
+            const newIndex = idx + 1;
+            card.dataset.templateIndex = String(newIndex);
+            card.querySelector(".template-title").textContent = `Template #${newIndex}`;
+            card.querySelector(".assunto-input").setAttribute("name", `assunto_${newIndex}`);
+            card.querySelector(".corpo-textarea").setAttribute("name", `template_${newIndex}`);
+            card.querySelector(".fase-input").setAttribute("name", `fase_${newIndex}`);
+            card.querySelector(".links-container").id = `links-${newIndex}`;
+            renumberLinks(card, newIndex);
+        });
+        templateCount = cards.length;
+    }
+    function renumberLinks(card, templateIndex) {
+        const rows = card.querySelectorAll(".link-row");
+        rows.forEach((row, idx) => {
+            const linkIdx = idx + 1;
+            row.querySelector(".link-label label").textContent = `Link #${linkIdx}`;
+            const input = row.querySelector(".link-input");
+            input.name = `link_${templateIndex}_${linkIdx}`;
+            input.placeholder = `https://exemplo.com (Link #${linkIdx})`;
+            input.required = true; // Todo link deve ter uma URL
+        });
+    }
+    document.getElementById("add-template-btn").addEventListener("click", addTemplate);
+    window.addEventListener('DOMContentLoaded', (event) => {
+        renumberTemplates();
+    });
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
