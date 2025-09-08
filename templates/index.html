@@ -49,8 +49,12 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Gerenciador de Campanhas</h1>
         <div class="header-buttons">
-          <a href="{{ url_for('cliques_page') }}" class="btn btn-info">Ver Cliques</a>
-          <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Sair</a>
+          <a href="{{ url_for('cliques_page') }}" class="btn btn-info"
+            >Ver Cliques</a
+          >
+          <a href="{{ url_for('logout') }}" class="btn btn-outline-danger"
+            >Sair</a
+          >
         </div>
       </div>
 
@@ -74,97 +78,158 @@
 
       <form method="POST">
         <div class="card">
-          <div class="card-header font-weight-bold">
-            1. Criar Nova Campanha
-          </div>
+          <div class="card-header font-weight-bold">1. Criar Nova Campanha</div>
           <div class="card-body">
             <div class="form-row">
               <div class="form-group col-md-6">
                 <label>Nome da campanha</label>
-                <input type="text" class="form-control" name="campanha" required />
+                <input
+                  type="text"
+                  class="form-control"
+                  name="campanha"
+                  required
+                />
               </div>
               <div class="form-group col-md-6">
                 <label class="d-block">Tipo de Campanha</label>
                 <div class="form-check form-check-inline mt-2">
-                  <input class="form-check-input" type="radio" name="tipo_campanha" id="tipo_email" value="email" required />
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="tipo_campanha"
+                    id="tipo_email"
+                    value="email"
+                    required
+                  />
                   <label class="form-check-label" for="tipo_email">Email</label>
                 </div>
                 <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="tipo_campanha" id="tipo_whatsapp" value="whatsapp" />
-                  <label class="form-check-label" for="tipo_whatsapp">WhatsApp</label>
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="tipo_campanha"
+                    id="tipo_whatsapp"
+                    value="whatsapp"
+                  />
+                  <label class="form-check-label" for="tipo_whatsapp"
+                    >WhatsApp</label
+                  >
                 </div>
               </div>
             </div>
-            
+
             <div class="form-row">
               <div class="form-group col-md-6">
                 <label for="trello-board-select">Board do Trello</label>
-                <select id="trello-board-select" name="trello_board" class="form-control">
-                    <option value="" selected>Selecione um Board...</option>
-                    {% for board in trello_boards %}
-                        <option value="{{ board.id }}">{{ board.name }}</option>
-                    {% endfor %}
+                <select
+                  id="trello-board-select"
+                  name="trello_board"
+                  class="form-control"
+                >
+                  <option value="" selected>Selecione um Board...</option>
+                  {% for board in trello_boards %}
+                  <option value="{{ board.id }}">{{ board.name }}</option>
+                  {% endfor %}
                 </select>
               </div>
               <div class="form-group col-md-6">
                 <label for="trello-list-select">Lista do Trello</label>
-                <select id="trello-list-select" name="trello_list" class="form-control" disabled>
-                    <option value="">Aguardando seleção do Board...</option>
+                <select
+                  id="trello-list-select"
+                  name="trello_list"
+                  class="form-control"
+                  disabled
+                >
+                  <option value="">Aguardando seleção do Board...</option>
                 </select>
               </div>
             </div>
 
-            <hr>
+            <hr />
             <h6>Agendamento (Opcional)</h6>
             <div class="form-row align-items-end">
-                <div class="form-group col-md-3">
-                    <label for="schedule-type">Periodicidade</label>
-                    <select id="schedule-type" class="form-control">
-                        <option value="none" selected>Nenhuma</option>
-                        <option value="daily">Diariamente</option>
-                        <option value="weekly">Semanalmente</option>
-                        <option value="monthly">Mensalmente</option>
-                    </select>
-                </div>
-                
-                <div id="weekly-options" class="form-group col-md-3 schedule-options">
-                    <label for="schedule-weekday">Dia da Semana</label>
-                    <select id="schedule-weekday" class="form-control">
-                        <option value="1">Segunda-feira</option>
-                        <option value="2">Terça-feira</option>
-                        <option value="3">Quarta-feira</option>
-                        <option value="4">Quinta-feira</option>
-                        <option value="5">Sexta-feira</option>
-                        <option value="6">Sábado</option>
-                        <option value="0">Domingo</option>
-                    </select>
-                </div>
+              <div class="form-group col-md-3">
+                <label for="schedule-type">Periodicidade</label>
+                <select id="schedule-type" class="form-control">
+                  <option value="none" selected>Nenhuma</option>
+                  <option value="daily">Diariamente</option>
+                  <option value="weekly">Semanalmente</option>
+                  <option value="monthly">Mensalmente</option>
+                </select>
+              </div>
 
-                <div id="monthly-options" class="form-group col-md-3 schedule-options">
-                    <label for="schedule-day-month">Dia do Mês</label>
-                    <input type="number" id="schedule-day-month" class="form-control" value="1" min="1" max="31">
-                </div>
+              <div
+                id="weekly-options"
+                class="form-group col-md-3 schedule-options"
+              >
+                <label for="schedule-weekday">Dia da Semana</label>
+                <select id="schedule-weekday" class="form-control">
+                  <option value="1">Segunda-feira</option>
+                  <option value="2">Terça-feira</option>
+                  <option value="3">Quarta-feira</option>
+                  <option value="4">Quinta-feira</option>
+                  <option value="5">Sexta-feira</option>
+                  <option value="6">Sábado</option>
+                  <option value="0">Domingo</option>
+                </select>
+              </div>
 
-                <div id="time-options" class="form-group col-md-3 schedule-options">
-                    <label for="schedule-time">Horário</label>
-                    <input type="time" id="schedule-time" class="form-control" value="09:00">
-                </div>
+              <div
+                id="monthly-options"
+                class="form-group col-md-3 schedule-options"
+              >
+                <label for="schedule-day-month">Dia do Mês</label>
+                <input
+                  type="number"
+                  id="schedule-day-month"
+                  class="form-control"
+                  value="1"
+                  min="1"
+                  max="31"
+                />
+              </div>
+
+              <div
+                id="time-options"
+                class="form-group col-md-3 schedule-options"
+              >
+                <label for="schedule-time">Horário</label>
+                <input
+                  type="time"
+                  id="schedule-time"
+                  class="form-control"
+                  value="09:00"
+                />
+              </div>
             </div>
             <small id="cron-preview" class="form-text text-muted"></small>
-            <input type="hidden" name="periodicidade_cron" id="cron-output">
-            <hr>
-            
+            <input type="hidden" name="periodicidade_cron" id="cron-output" />
+            <hr />
+
             <div class="form-group">
               <label>Observações</label>
-              <textarea class="form-control" name="observacoes" rows="2" placeholder="Opcional"></textarea>
+              <textarea
+                class="form-control"
+                name="observacoes"
+                rows="2"
+                placeholder="Opcional"
+              ></textarea>
             </div>
           </div>
         </div>
 
         <div id="templates-container"></div>
-        <button type="button" class="btn btn-primary mb-3" id="add-template-btn">+ Adicionar Template</button>
+        <button
+          type="button"
+          class="btn btn-primary mb-3"
+          id="add-template-btn"
+        >
+          + Adicionar Template
+        </button>
 
-        <button type="submit" class="btn btn-success btn-lg btn-block">Criar Nova Campanha</button>
+        <button type="submit" class="btn btn-success btn-lg btn-block">
+          Criar Nova Campanha
+        </button>
       </form>
 
       <hr class="mt-5 mb-4" />
@@ -180,15 +245,22 @@
               >Tipo: {{ campanha.tipo_campanha }} | Criada em: {{
               campanha.data_criacao | replace('-', '/') }}</small
             >
-            </div>
+          </div>
           <div class="d-flex align-items-center">
             <a
               href="{{ url_for('edit', id_campanha=campanha.id_campanha) }}"
               class="btn btn-secondary btn-sm"
               >Editar</a
             >
-            <form method="POST" action="{{ url_for('delete', id_campanha=campanha.id_campanha) }}" onsubmit="return confirm('Tem certeza que deseja remover esta campanha? Todos os templates e links associados serão perdidos permanentemente.');" class="ml-2">
-              <button type="submit" class="btn btn-danger btn-sm">Remover</button>
+            <form
+              method="POST"
+              action="{{ url_for('delete', id_campanha=campanha.id_campanha) }}"
+              onsubmit="return confirm('Tem certeza que deseja remover esta campanha? Todos os templates e links associados serão perdidos permanentemente.');"
+              class="ml-2"
+            >
+              <button type="submit" class="btn btn-danger btn-sm">
+                Remover
+              </button>
             </form>
           </div>
         </div>
@@ -204,7 +276,6 @@
     </div>
 
     <script>
-      // ... (todo o seu javascript existente continua aqui, sem alterações)
       let templateCount = 0;
       function addTemplate() {
         templateCount++;
@@ -228,8 +299,15 @@
         addLinkToCard(card);
         renumberTemplates();
       }
-      function removeTemplate(btn) { const card = btn.closest(".template-card"); card.remove(); renumberTemplates(); }
-      function addLinkDynamic(el) { const card = el.closest(".template-card"); addLinkToCard(card); }
+      function removeTemplate(btn) {
+        const card = btn.closest(".template-card");
+        card.remove();
+        renumberTemplates();
+      }
+      function addLinkDynamic(el) {
+        const card = el.closest(".template-card");
+        addLinkToCard(card);
+      }
       function addLinkToCard(card) {
         const linksDiv = card.querySelector(".links-container");
         const row = document.createElement("div");
@@ -243,7 +321,10 @@
         const card = btn.closest(".template-card");
         const linksDiv = card.querySelector(".links-container");
         const rows = linksDiv.querySelectorAll(".link-row");
-        if (rows.length <= 1) { alert("Pelo menos 1 link por template."); return; }
+        if (rows.length <= 1) {
+          alert("Pelo menos 1 link por template.");
+          return;
+        }
         btn.closest(".link-row").remove();
         const templateIndex = parseInt(card.dataset.templateIndex);
         renumberLinks(card, templateIndex);
@@ -251,111 +332,137 @@
       function renumberTemplates() {
         const cards = document.querySelectorAll(".template-card");
         cards.forEach((card, idx) => {
-            const newIndex = idx + 1;
-            card.dataset.templateIndex = String(newIndex);
-            card.querySelector(".template-title").textContent = `Template #${newIndex}`;
-            card.querySelector(".assunto-input").setAttribute("name", `assunto_${newIndex}`);
-            card.querySelector(".corpo-textarea").setAttribute("name", `template_${newIndex}`);
-            card.querySelector(".fase-input").setAttribute("name", `fase_${newIndex}`);
-            card.querySelector(".links-container").id = `links-${newIndex}`;
-            renumberLinks(card, newIndex);
+          const newIndex = idx + 1;
+          card.dataset.templateIndex = String(newIndex);
+          card.querySelector(
+            ".template-title"
+          ).textContent = `Template #${newIndex}`;
+          card
+            .querySelector(".assunto-input")
+            .setAttribute("name", `assunto_${newIndex}`);
+          card
+            .querySelector(".corpo-textarea")
+            .setAttribute("name", `template_${newIndex}`);
+          card
+            .querySelector(".fase-input")
+            .setAttribute("name", `fase_${newIndex}`);
+          card.querySelector(".links-container").id = `links-${newIndex}`;
+          renumberLinks(card, newIndex);
         });
         templateCount = cards.length;
       }
       function renumberLinks(card, templateIndex) {
         const rows = card.querySelectorAll(".link-row");
         rows.forEach((row, idx) => {
-            const linkIdx = idx + 1;
-            row.querySelector(".link-label label").textContent = `Link #${linkIdx}`;
-            const input = row.querySelector(".link-input");
-            input.name = `link_${templateIndex}_${linkIdx}`;
-            input.placeholder = `https://exemplo.com (Link #${linkIdx})`;
-            input.required = linkIdx === 1;
+          const linkIdx = idx + 1;
+          row.querySelector(
+            ".link-label label"
+          ).textContent = `Link #${linkIdx}`;
+          const input = row.querySelector(".link-input");
+          input.name = `link_${templateIndex}_${linkIdx}`;
+          input.placeholder = `https://exemplo.com (Link #${linkIdx})`;
+          input.required = linkIdx === 1;
         });
       }
-      document.getElementById("add-template-btn").addEventListener("click", addTemplate);
-      
-      document.getElementById('trello-board-select').addEventListener('change', function() {
-        const boardId = this.value;
-        const listSelect = document.getElementById('trello-list-select');
-        listSelect.innerHTML = '<option value="">Carregando...</option>';
-        listSelect.disabled = true;
-        if (!boardId) {
-            listSelect.innerHTML = '<option value="">Aguardando seleção do Board...</option>';
-            return;
-        }
-        fetch(`/get_trello_lists/${boardId}`)
-            .then(response => response.json())
-            .then(lists => {
-                listSelect.innerHTML = '<option value="">Selecione uma Lista...</option>';
-                lists.forEach(list => {
-                    const option = document.createElement('option');
-                    option.value = list.id;
-                    option.textContent = list.name;
-                    listSelect.appendChild(option);
-                });
-                listSelect.disabled = false;
-            })
-            .catch(error => {
-                console.error('Erro ao buscar listas do Trello:', error);
-                listSelect.innerHTML = '<option value="">Erro ao carregar listas</option>';
-            });
-      });
+      document
+        .getElementById("add-template-btn")
+        .addEventListener("click", addTemplate);
 
-      const scheduleType = document.getElementById('schedule-type');
-      const weeklyOptions = document.getElementById('weekly-options');
-      const monthlyOptions = document.getElementById('monthly-options');
-      const timeOptions = document.getElementById('time-options');
-      const allScheduleInputs = document.querySelectorAll('#weekly-options select, #monthly-options input, #time-options input');
-      function updateScheduleVisibility() {
-          weeklyOptions.style.display = 'none';
-          monthlyOptions.style.display = 'none';
-          timeOptions.style.display = 'none';
-          const type = scheduleType.value;
-          if (type === 'daily') {
-              timeOptions.style.display = 'block';
-          } else if (type === 'weekly') {
-              weeklyOptions.style.display = 'block';
-              timeOptions.style.display = 'block';
-          } else if (type === 'monthly') {
-              monthlyOptions.style.display = 'block';
-              timeOptions.style.display = 'block';
+      document
+        .getElementById("trello-board-select")
+        .addEventListener("change", function () {
+          const boardId = this.value;
+          const listSelect = document.getElementById("trello-list-select");
+          listSelect.innerHTML = '<option value="">Carregando...</option>';
+          listSelect.disabled = true;
+          if (!boardId) {
+            listSelect.innerHTML =
+              '<option value="">Aguardando seleção do Board...</option>';
+            return;
           }
-          generateCronString();
+          fetch(`/get_trello_lists/${boardId}`)
+            .then((response) => response.json())
+            .then((lists) => {
+              listSelect.innerHTML =
+                '<option value="">Selecione uma Lista...</option>';
+              lists.forEach((list) => {
+                const option = document.createElement("option");
+                option.value = list.id;
+                option.textContent = list.name;
+                listSelect.appendChild(option);
+              });
+              listSelect.disabled = false;
+            })
+            .catch((error) => {
+              console.error("Erro ao buscar listas do Trello:", error);
+              listSelect.innerHTML =
+                '<option value="">Erro ao carregar listas</option>';
+            });
+        });
+
+      const scheduleType = document.getElementById("schedule-type");
+      const weeklyOptions = document.getElementById("weekly-options");
+      const monthlyOptions = document.getElementById("monthly-options");
+      const timeOptions = document.getElementById("time-options");
+      const allScheduleInputs = document.querySelectorAll(
+        "#weekly-options select, #monthly-options input, #time-options input"
+      );
+      function updateScheduleVisibility() {
+        weeklyOptions.style.display = "none";
+        monthlyOptions.style.display = "none";
+        timeOptions.style.display = "none";
+        const type = scheduleType.value;
+        if (type === "daily") {
+          timeOptions.style.display = "block";
+        } else if (type === "weekly") {
+          weeklyOptions.style.display = "block";
+          timeOptions.style.display = "block";
+        } else if (type === "monthly") {
+          monthlyOptions.style.display = "block";
+          timeOptions.style.display = "block";
+        }
+        generateCronString();
       }
       function generateCronString() {
         const type = scheduleType.value;
-        const cronOutput = document.getElementById('cron-output');
-        const cronPreview = document.getElementById('cron-preview');
-        if (type === 'none') {
-            cronOutput.value = '';
-            cronPreview.textContent = '';
-            return;
+        const cronOutput = document.getElementById("cron-output");
+        const cronPreview = document.getElementById("cron-preview");
+        if (type === "none") {
+          cronOutput.value = "";
+          cronPreview.textContent = "";
+          return;
         }
-        const time = document.getElementById('schedule-time').value.split(':');
-        const minute = time[1]; const hour = time[0];
-        let dayOfMonth = '*', month = '*', dayOfWeek = '*', previewText = '';
-        if (type === 'daily') {
-            previewText = `Será executado diariamente às ${hour}:${minute}.`;
-        } else if (type === 'weekly') {
-            dayOfWeek = document.getElementById('schedule-weekday').value;
-            const weekdayText = document.getElementById('schedule-weekday').options[document.getElementById('schedule-weekday').selectedIndex].text;
-            previewText = `Será executado toda ${weekdayText} às ${hour}:${minute}.`;
-        } else if (type === 'monthly') {
-            dayOfMonth = document.getElementById('schedule-day-month').value;
-            previewText = `Será executado todo dia ${dayOfMonth} de cada mês às ${hour}:${minute}.`;
+        const time = document.getElementById("schedule-time").value.split(":");
+        const minute = time[1];
+        const hour = time[0];
+        let dayOfMonth = "*",
+          month = "*",
+          dayOfWeek = "*",
+          previewText = "";
+        if (type === "daily") {
+          previewText = `Será executado diariamente às ${hour}:${minute}.`;
+        } else if (type === "weekly") {
+          dayOfWeek = document.getElementById("schedule-weekday").value;
+          const weekdayText =
+            document.getElementById("schedule-weekday").options[
+              document.getElementById("schedule-weekday").selectedIndex
+            ].text;
+          previewText = `Será executado toda ${weekdayText} às ${hour}:${minute}.`;
+        } else if (type === "monthly") {
+          dayOfMonth = document.getElementById("schedule-day-month").value;
+          previewText = `Será executado todo dia ${dayOfMonth} de cada mês às ${hour}:${minute}.`;
         }
         const cronString = `${minute} ${hour} ${dayOfMonth} ${month} ${dayOfWeek}`;
         cronOutput.value = cronString;
         cronPreview.textContent = `Prévia do Agendamento: ${previewText}`;
       }
-      scheduleType.addEventListener('change', updateScheduleVisibility);
-      allScheduleInputs.forEach(input => {
-          input.addEventListener('change', generateCronString);
+      scheduleType.addEventListener("change", updateScheduleVisibility);
+      allScheduleInputs.forEach((input) => {
+        input.addEventListener("change", generateCronString);
       });
       updateScheduleVisibility();
     </script>
-    
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

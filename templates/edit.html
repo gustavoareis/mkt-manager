@@ -169,9 +169,7 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <script>
-    // Bloco de scripts para templates/links (idêntico ao de antes)
     let templateCount = parseInt("{{ campanha.templates|length }}");
-    // ... (copie e cole todo o JS de templates/links do seu edit.html antigo aqui)
     function addTemplate() {
         templateCount++;
         const card = document.createElement("div");
@@ -238,9 +236,7 @@
     }
     document.getElementById("add-template-btn").addEventListener("click", addTemplate);
     
-    // NOVO BLOCO DE SCRIPTS PARA TRELLO E AGENDAMENTO
     document.addEventListener('DOMContentLoaded', function() {
-        // --- LÓGICA DO TRELLO ---
         const boardSelect = document.getElementById('trello-board-select');
         const listSelect = document.getElementById('trello-list-select');
         const savedListId = "{{ campanha.trello_list_id or '' }}";
@@ -342,11 +338,10 @@
         scheduleType.addEventListener('change', () => { updateScheduleVisibility(); generateCronString(); });
         allScheduleInputs.forEach(input => input.addEventListener('change', generateCronString));
         
-        // Inicialização da página
         renumberTemplates();
         parseCronAndSetInputs(initialCron);
         updateScheduleVisibility();
-        generateCronString(); // Gera o valor inicial do CRON no campo oculto
+        generateCronString();
     });
 </script>
 </body>
