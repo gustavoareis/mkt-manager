@@ -142,6 +142,9 @@
                         <button type="button" class="btn btn-sm btn-info add-link-btn" onclick="addLinkDynamic(this)">+ Link</button>
                     </div>
                     <div class="links-container" id="links-{{ loop.index }}">
+                        {% if not template.links %}
+                        <!-- Sem links para este template -->
+                        {% endif %}
                         {% for link in template.links %}
                         <div class="form-row align-items-center link-row">
                             <div class="col-auto link-label"><label>Link #{{ loop.index }}</label></div>
@@ -185,7 +188,6 @@
                 <div class="links-container" id="links-${templateCount}"></div>
             </div>`;
         document.getElementById("templates-container").appendChild(card);
-        addLinkToCard(card);
         renumberTemplates();
     }
     function removeTemplate(btn) { const card = btn.closest(".template-card"); card.remove(); renumberTemplates(); }
@@ -194,7 +196,7 @@
         const linksDiv = card.querySelector(".links-container");
         const row = document.createElement("div");
         row.className = "form-row align-items-center link-row";
-        row.innerHTML = `<div class="col-auto link-label"><label>Link #</label></div><div class="col"><input type="url" class="form-control link-input" placeholder="https://exemplo.com"></div><div class="col-auto"><button type="button" class="btn btn-sm btn-outline-danger remove-link-btn" onclick="removeLink(this)">Remover</button></div>`;
+        row.innerHTML = `<div class="col-auto link-label"><label>Link #</label></div><div class="col"><input type="url" class="form-control link-input" placeholder="https://exemplo.com" required></div><div class="col-auto"><button type="button" class="btn btn-sm btn-outline-danger remove-link-btn" onclick="removeLink(this)">Remover</button></div>`;
         linksDiv.appendChild(row);
         const templateIndex = parseInt(card.dataset.templateIndex);
         renumberLinks(card, templateIndex);
@@ -202,9 +204,6 @@
     function removeLink(btn) {
         const card = btn.closest(".template-card");
         const linksContainer = card.querySelector(".links-container");
-        if (linksContainer.querySelectorAll(".link-row").length <= 1) {
-            alert("Pelo menos um link é necessário por template."); return;
-        }
         btn.closest(".link-row").remove();
         const templateIndex = parseInt(card.dataset.templateIndex);
         renumberLinks(card, templateIndex);
@@ -231,7 +230,6 @@
             const input = row.querySelector(".link-input");
             input.name = `link_${templateIndex}_${linkIdx}`;
             input.placeholder = `https://exemplo.com (Link #${linkIdx})`;
-            input.required = true;
         });
     }
     document.getElementById("add-template-btn").addEventListener("click", addTemplate);

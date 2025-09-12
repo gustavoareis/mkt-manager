@@ -296,7 +296,6 @@
         <div class="links-container" id="links-${templateCount}"></div>
       </div>`;
         document.getElementById("templates-container").appendChild(card);
-        addLinkToCard(card);
         renumberTemplates();
       }
       function removeTemplate(btn) {
@@ -312,7 +311,7 @@
         const linksDiv = card.querySelector(".links-container");
         const row = document.createElement("div");
         row.className = "form-row align-items-center link-row";
-        row.innerHTML = `<div class="col-auto link-label"><label>Link #</label></div><div class="col"><input type="url" class="form-control link-input" placeholder="https://exemplo.com"></div><div class="col-auto"><button type="button" class="btn btn-sm btn-outline-danger remove-link-btn" onclick="removeLink(this)">Remover</button></div>`;
+        row.innerHTML = `<div class="col-auto link-label"><label>Link #</label></div><div class="col"><input type="url" class="form-control link-input" placeholder="https://exemplo.com" required></div><div class="col-auto"><button type="button" class="btn btn-sm btn-outline-danger remove-link-btn" onclick="removeLink(this)">Remover</button></div>`;
         linksDiv.appendChild(row);
         const templateIndex = parseInt(card.dataset.templateIndex);
         renumberLinks(card, templateIndex);
@@ -320,11 +319,6 @@
       function removeLink(btn) {
         const card = btn.closest(".template-card");
         const linksDiv = card.querySelector(".links-container");
-        const rows = linksDiv.querySelectorAll(".link-row");
-        if (rows.length <= 1) {
-          alert("Pelo menos 1 link por template.");
-          return;
-        }
         btn.closest(".link-row").remove();
         const templateIndex = parseInt(card.dataset.templateIndex);
         renumberLinks(card, templateIndex);
@@ -361,7 +355,6 @@
           const input = row.querySelector(".link-input");
           input.name = `link_${templateIndex}_${linkIdx}`;
           input.placeholder = `https://exemplo.com (Link #${linkIdx})`;
-          input.required = linkIdx === 1;
         });
       }
       document
