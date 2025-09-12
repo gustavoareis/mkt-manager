@@ -1,346 +1,424 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8" />
-    <title>Editando: {{ campanha.campanha }}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
-    <style>
-        body { padding-top: 20px; padding-bottom: 50px; }
-        .container { max-width: 1000px; }
-        .card { margin-bottom: 20px; }
-        .template-card .card-header { display: flex; justify-content: space-between; align-items: center; }
-        .link-row { gap: 0.5rem; }
-        .link-label { min-width: 80px; display: flex; align-items: center; }
-        .remove-link-btn { white-space: nowrap; }
-        .schedule-options { display: none; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Editando: {{ campanha.campanha }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <style>
+    body {
+      padding-top: 20px;
+      padding-bottom: 50px;
+    }
+    .container {
+      max-width: 1000px;
+    }
+    .card {
+      margin-bottom: 20px;
+    }
+    .template-card .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .link-row {
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .link-label {
+      min-width: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    .remove-link-btn {
+      white-space: nowrap;
+    }
+    .schedule-options {
+      display: none;
+    }
+  </style>
 </head>
 <body>
-<div class="container">
+  <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Editando: {{ campanha.campanha }}</h1>
-        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Voltar</a>
+      <h1>Editando: {{ campanha.campanha }}</h1>
+      <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Voltar</a>
     </div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %} 
-    {% if messages %} 
-    {% for category, message in messages %}
-    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">×</span>
-        </button>
-    </div>
-    {% endfor %} 
-    {% endif %} 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% endfor %}
+      {% endif %}
     {% endwith %}
 
     <form method="POST">
-        <div class="card">
-            <div class="card-header font-weight-bold">1. Definição da Campanha</div>
+      <div class="card">
+        <div class="card-header font-weight-bold">1. Definição da Campanha</div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label>Nome da campanha</label>
+              <input type="text" class="form-control" name="campanha" value="{{ campanha.campanha }}" required />
+            </div>
+            <div class="form-group col-md-6">
+              <label class="d-block">Tipo de Campanha</label>
+              <div class="form-check form-check-inline mt-2">
+                <input class="form-check-input" type="radio" name="tipo_campanha" id="tipo_email" value="email" {% if campanha.tipo_campanha == 'email' %}checked{% endif %} required />
+                <label class="form-check-label" for="tipo_email">Email</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="tipo_campanha" id="tipo_whatsapp" value="whatsapp" {% if campanha.tipo_campanha == 'whatsapp' %}checked{% endif %} />
+                <label class="form-check-label" for="tipo_whatsapp">WhatsApp</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="trello-board-select">Board do Trello</label>
+              <select id="trello-board-select" name="trello_board" class="form-control">
+                <option value="">Selecione um Board...</option>
+                {% for board in trello_boards %}
+                  <option value="{{ board.id }}" {% if board.id == campanha.trello_board_id %}selected{% endif %}>{{ board.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group col-md-6">
+              <label for="trello-list-select">Lista do Trello</label>
+              <select id="trello-list-select" name="trello_list" class="form-control" disabled>
+                <option value="">Aguardando seleção do Board...</option>
+              </select>
+            </div>
+          </div>
+
+          <hr>
+          <h6>Agendamento (Opcional)</h6>
+          <div class="form-row align-items-end">
+            <div class="form-group col-md-3">
+              <label for="schedule-type">Periodicidade</label>
+              <select id="schedule-type" class="form-control">
+                <option value="none" selected>Nenhuma</option>
+                <option value="daily">Diariamente</option>
+                <option value="weekly">Semanalmente</option>
+                <option value="monthly">Mensalmente</option>
+              </select>
+            </div>
+            <div id="weekly-options" class="form-group col-md-3 schedule-options">
+              <label for="schedule-weekday">Dia da Semana</label>
+              <select id="schedule-weekday" class="form-control">
+                <option value="1">Segunda-feira</option>
+                <option value="2">Terça-feira</option>
+                <option value="3">Quarta-feira</option>
+                <option value="4">Quinta-feira</option>
+                <option value="5">Sexta-feira</option>
+                <option value="6">Sábado</option>
+                <option value="0">Domingo</option>
+              </select>
+            </div>
+            <div id="monthly-options" class="form-group col-md-3 schedule-options">
+              <label for="schedule-day-month">Dia do Mês</label>
+              <input type="number" id="schedule-day-month" class="form-control" value="1" min="1" max="31">
+            </div>
+            <div id="time-options" class="form-group col-md-3 schedule-options">
+              <label for="schedule-time">Horário</label>
+              <input type="time" id="schedule-time" class="form-control" value="09:00">
+            </div>
+          </div>
+          <small id="cron-preview" class="form-text text-muted"></small>
+          <input type="hidden" name="periodicidade_cron" id="cron-output">
+          <hr>
+
+          <div class="form-group">
+            <label>Observações</label>
+            <textarea class="form-control" name="observacoes" rows="2">{{ campanha.observacoes }}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <div id="templates-container">
+        {% for template in campanha.templates %}
+          <div class="card template-card" data-template-index="{{ loop.index }}">
+            <div class="card-header">
+              <span class="template-title">Template #{{ loop.index }}</span>
+              <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeTemplate(this)">Remover template</button>
+            </div>
             <div class="card-body">
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label>Nome da campanha</label>
-                        <input type="text" class="form-control" name="campanha" value="{{ campanha.campanha }}" required />
+              <div class="form-group">
+                <label>Assunto</label>
+                <input type="text" class="form-control assunto-input" name="assunto_{{ loop.index }}" value="{{ template.assunto }}" placeholder="Opcional">
+              </div>
+              <div class="form-group">
+                <label>Corpo do template</label>
+                <textarea class="form-control corpo-textarea" name="template_{{ loop.index }}" rows="4">{{ template.corpo }}</textarea>
+              </div>
+              <div class="form-group">
+                <label>Fase</label>
+                <input type="number" class="form-control fase-input" name="fase_{{ loop.index }}" value="{{ template.fase }}" min="1" required>
+              </div>
+              <div class="mb-2 d-flex justify-content-between align-items-center">
+                <strong>Links deste template</strong>
+                <button type="button" class="btn btn-sm btn-info add-link-btn" onclick="addLinkDynamic(this)">+ Link</button>
+              </div>
+              <div class="links-container" id="links-{{ loop.index }}">
+                {% for link in template.links %}
+                  <div class="form-row align-items-center link-row">
+                    <div class="col-auto link-label"><label>Link #{{ loop.index }}</label></div>
+                    <div class="col">
+                      <input type="url" class="form-control link-input" name="link_{{ template.fase }}_{{ loop.index }}" value="{{ link.url_destino }}" required>
                     </div>
-                    <div class="form-group col-md-6">
-                        <label class="d-block">Tipo de Campanha</label>
-                        <div class="form-check form-check-inline mt-2">
-                            <input class="form-check-input" type="radio" name="tipo_campanha" id="tipo_email" value="email" {% if campanha.tipo_campanha == 'email' %}checked{% endif %} required />
-                            <label class="form-check-label" for="tipo_email">Email</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="tipo_campanha" id="tipo_whatsapp" value="whatsapp" {% if campanha.tipo_campanha == 'whatsapp' %}checked{% endif %} />
-                            <label class="form-check-label" for="tipo_whatsapp">WhatsApp</label>
-                        </div>
+                    <div class="col-auto">
+                      <button type="button" class="btn btn-sm btn-outline-danger remove-link-btn" onclick="removeLink(this)">Remover</button>
                     </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="trello-board-select">Board do Trello</label>
-                        <select id="trello-board-select" name="trello_board" class="form-control">
-                            <option value="">Selecione um Board...</option>
-                            {% for board in trello_boards %}
-                                <option value="{{ board.id }}" {% if board.id == campanha.trello_board_id %}selected{% endif %}>{{ board.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="trello-list-select">Lista do Trello</label>
-                        <select id="trello-list-select" name="trello_list" class="form-control" disabled>
-                            <option value="">Aguardando seleção do Board...</option>
-                        </select>
-                    </div>
-                </div>
-
-                <hr>
-                <h6>Agendamento (Opcional)</h6>
-                <div class="form-row align-items-end">
-                    <div class="form-group col-md-3">
-                        <label for="schedule-type">Periodicidade</label>
-                        <select id="schedule-type" class="form-control">
-                            <option value="none" selected>Nenhuma</option>
-                            <option value="daily">Diariamente</option>
-                            <option value="weekly">Semanalmente</option>
-                            <option value="monthly">Mensalmente</option>
-                        </select>
-                    </div>
-                    <div id="weekly-options" class="form-group col-md-3 schedule-options">
-                        <label for="schedule-weekday">Dia da Semana</label>
-                        <select id="schedule-weekday" class="form-control">
-                            <option value="1">Segunda-feira</option> <option value="2">Terça-feira</option>
-                            <option value="3">Quarta-feira</option> <option value="4">Quinta-feira</option>
-                            <option value="5">Sexta-feira</option> <option value="6">Sábado</option>
-                            <option value="0">Domingo</option>
-                        </select>
-                    </div>
-                    <div id="monthly-options" class="form-group col-md-3 schedule-options">
-                        <label for="schedule-day-month">Dia do Mês</label>
-                        <input type="number" id="schedule-day-month" class="form-control" value="1" min="1" max="31">
-                    </div>
-                    <div id="time-options" class="form-group col-md-3 schedule-options">
-                        <label for="schedule-time">Horário</label>
-                        <input type="time" id="schedule-time" class="form-control" value="09:00">
-                    </div>
-                </div>
-                <small id="cron-preview" class="form-text text-muted"></small>
-                <input type="hidden" name="periodicidade_cron" id="cron-output">
-                <hr>
-
-                <div class="form-group">
-                    <label>Observações</label>
-                    <textarea class="form-control" name="observacoes" rows="2">{{ campanha.observacoes }}</textarea>
-                </div>
+                  </div>
+                {% endfor %}
+              </div>
             </div>
-        </div>
+          </div>
+        {% endfor %}
+      </div>
+      <button type="button" class="btn btn-primary mb-3" id="add-template-btn">+ Adicionar Template</button>
 
-        <div id="templates-container">
-            {% for template in campanha.templates %}
-            <div class="card template-card" data-template-index="{{ loop.index }}">
-                <div class="card-header">
-                    <span class="template-title">Template #{{ loop.index }}</span>
-                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeTemplate(this)">Remover template</button>
-                </div>
-                <div class="card-body">
-                    <div class="form-group">
-                        <label>Assunto</label>
-                        <input type="text" class="form-control assunto-input" name="assunto_{{ loop.index }}" value="{{ template.assunto }}" placeholder="Opcional">
-                    </div>
-                    <div class="form-group">
-                        <label>Corpo do template</label>
-                        <textarea class="form-control corpo-textarea" name="template_{{ loop.index }}" rows="4">{{ template.corpo }}</textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Fase</label>
-                        <input type="number" class="form-control fase-input" name="fase_{{ loop.index }}" value="{{ template.fase }}" min="1" required>
-                    </div>
-                    <div class="mb-2 d-flex justify-content-between align-items-center">
-                        <strong>Links deste template</strong>
-                        <button type="button" class="btn btn-sm btn-info add-link-btn" onclick="addLinkDynamic(this)">+ Link</button>
-                    </div>
-                    <div class="links-container" id="links-{{ loop.index }}">
-                        {% if not template.links %}
-                        <!-- Sem links para este template -->
-                        {% endif %}
-                        {% for link in template.links %}
-                        <div class="form-row align-items-center link-row">
-                            <div class="col-auto link-label"><label>Link #{{ loop.index }}</label></div>
-                            <div class="col">
-                                <input type="url" class="form-control link-input" name="link_{{ template.fase }}_{{ loop.index }}" value="{{ link.url_destino }}" required>
-                            </div>
-                            <div class="col-auto">
-                                <button type="button" class="btn btn-sm btn-outline-danger remove-link-btn" onclick="removeLink(this)">Remover</button>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        <button type="button" class="btn btn-primary mb-3" id="add-template-btn">+ Adicionar Template</button>
-
-        <button type="submit" class="btn btn-success btn-lg btn-block">Salvar Alterações</button>
+      <button type="submit" class="btn btn-success btn-lg btn-block">Salvar Alterações</button>
     </form>
-</div>
+  </div>
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-<script>
-    let templateCount = parseInt("{{ campanha.templates|length }}");
-    function addTemplate() {
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      let templateCount = parseInt("{{ campanha.templates|length }}");
+
+      function addTemplate() {
         templateCount++;
         const card = document.createElement("div");
         card.className = "card template-card";
         card.dataset.templateIndex = String(templateCount);
         card.innerHTML = `
-            <div class="card-header"><span class="template-title">Template #${templateCount}</span><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeTemplate(this)">Remover template</button></div>
-            <div class="card-body">
-                <div class="form-group"><label>Assunto</label><input type="text" class="form-control assunto-input" name="assunto_${templateCount}" placeholder="Opcional"></div>
-                <div class="form-group"><label>Corpo do template</label><textarea class="form-control corpo-textarea" name="template_${templateCount}" rows="4" placeholder="Use [link1], [link2], ..."></textarea></div>
-                <div class="form-group"><label>Fase</label><input type="number" class="form-control fase-input" name="fase_${templateCount}" min="1" required></div>
-                <div class="mb-2 d-flex justify-content-between align-items-center"><strong>Links deste template</strong><button type="button" class="btn btn-sm btn-info add-link-btn" onclick="addLinkDynamic(this)">+ Link</button></div>
-                <div class="links-container" id="links-${templateCount}"></div>
-            </div>`;
+          <div class="card-header">
+            <span class="template-title">Template #${templateCount}</span>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeTemplate(this)">Remover template</button>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>Assunto</label>
+              <input type="text" class="form-control assunto-input" name="assunto_${templateCount}" placeholder="Opcional">
+            </div>
+            <div class="form-group">
+              <label>Corpo do template</label>
+              <textarea class="form-control corpo-textarea" name="template_${templateCount}" rows="4" placeholder="Use [link1], [link2], ..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>Fase</label>
+              <input type="number" class="form-control fase-input" name="fase_${templateCount}" min="1" required>
+            </div>
+            <div class="mb-2 d-flex justify-content-between align-items-center">
+              <strong>Links deste template</strong>
+              <button type="button" class="btn btn-sm btn-info add-link-btn" onclick="addLinkDynamic(this)">+ Link</button>
+            </div>
+            <div class="links-container" id="links-${templateCount}"></div>
+          </div>`;
         document.getElementById("templates-container").appendChild(card);
         renumberTemplates();
-    }
-    function removeTemplate(btn) { const card = btn.closest(".template-card"); card.remove(); renumberTemplates(); }
-    function addLinkDynamic(el) { const card = el.closest(".template-card"); addLinkToCard(card); }
-    function addLinkToCard(card) {
+      }
+
+      function removeTemplate(btn) {
+        const card = btn.closest(".template-card");
+        card.remove();
+        renumberTemplates();
+      }
+
+      function addLinkDynamic(el) {
+        const card = el.closest(".template-card");
+        addLinkToCard(card);
+      }
+
+      function addLinkToCard(card) {
         const linksDiv = card.querySelector(".links-container");
         const row = document.createElement("div");
         row.className = "form-row align-items-center link-row";
-        row.innerHTML = `<div class="col-auto link-label"><label>Link #</label></div><div class="col"><input type="url" class="form-control link-input" placeholder="https://exemplo.com" required></div><div class="col-auto"><button type="button" class="btn btn-sm btn-outline-danger remove-link-btn" onclick="removeLink(this)">Remover</button></div>`;
+        row.innerHTML = `
+          <div class="col-auto link-label"><label>Link #</label></div>
+          <div class="col">
+            <input type="url" class="form-control link-input" placeholder="https://exemplo.com" required>
+          </div>
+          <div class="col-auto">
+            <button type="button" class="btn btn-sm btn-outline-danger remove-link-btn" onclick="removeLink(this)">Remover</button>
+          </div>`;
         linksDiv.appendChild(row);
         const templateIndex = parseInt(card.dataset.templateIndex);
         renumberLinks(card, templateIndex);
-    }
-    function removeLink(btn) {
+      }
+
+      function removeLink(btn) {
         const card = btn.closest(".template-card");
-        const linksContainer = card.querySelector(".links-container");
         btn.closest(".link-row").remove();
         const templateIndex = parseInt(card.dataset.templateIndex);
         renumberLinks(card, templateIndex);
-    }
-    function renumberTemplates() {
+      }
+
+      function renumberTemplates() {
         const cards = document.querySelectorAll(".template-card");
         cards.forEach((card, idx) => {
-            const newIndex = idx + 1;
-            card.dataset.templateIndex = String(newIndex);
-            card.querySelector(".template-title").textContent = `Template #${newIndex}`;
-            card.querySelector(".assunto-input").setAttribute("name", `assunto_${newIndex}`);
-            card.querySelector(".corpo-textarea").setAttribute("name", `template_${newIndex}`);
-            card.querySelector(".fase-input").setAttribute("name", `fase_${newIndex}`);
-            card.querySelector(".links-container").id = `links-${newIndex}`;
-            renumberLinks(card, newIndex);
+          const newIndex = idx + 1;
+          card.dataset.templateIndex = String(newIndex);
+          card.querySelector(".template-title").textContent = `Template #${newIndex}`;
+          card.querySelector(".assunto-input").name = `assunto_${newIndex}`;
+          card.querySelector(".corpo-textarea").name = `template_${newIndex}`;
+          card.querySelector(".fase-input").name = `fase_${newIndex}`;
+          card.querySelector(".links-container").id = `links-${newIndex}`;
+          renumberLinks(card, newIndex);
         });
         templateCount = cards.length;
-    }
-    function renumberLinks(card, templateIndex) {
+      }
+
+      function renumberLinks(card, templateIndex) {
         const rows = card.querySelectorAll(".link-row");
         rows.forEach((row, idx) => {
-            const linkIdx = idx + 1;
-            row.querySelector(".link-label label").textContent = `Link #${linkIdx}`;
-            const input = row.querySelector(".link-input");
-            input.name = `link_${templateIndex}_${linkIdx}`;
-            input.placeholder = `https://exemplo.com (Link #${linkIdx})`;
+          const linkIdx = idx + 1;
+          row.querySelector(".link-label label").textContent = `Link #${linkIdx}`;
+          const input = row.querySelector(".link-input");
+          input.name = `link_${templateIndex}_${linkIdx}`;
+          input.placeholder = `https://exemplo.com (Link #${linkIdx})`;
         });
-    }
-    document.getElementById("add-template-btn").addEventListener("click", addTemplate);
-    
-    document.addEventListener('DOMContentLoaded', function() {
-        const boardSelect = document.getElementById('trello-board-select');
-        const listSelect = document.getElementById('trello-list-select');
-        const savedListId = "{{ campanha.trello_list_id or '' }}";
+      }
 
-        function fetchAndSetTrelloLists() {
-            const boardId = boardSelect.value;
-            listSelect.innerHTML = '<option value="">Carregando...</option>';
-            listSelect.disabled = true;
+      document.getElementById("add-template-btn").addEventListener("click", addTemplate);
 
-            if (!boardId) {
-                listSelect.innerHTML = '<option value="">Aguardando seleção do Board...</option>';
-                return;
-            }
-            
-            fetch(`/get_trello_lists/${boardId}`)
-                .then(response => response.json())
-                .then(lists => {
-                    listSelect.innerHTML = '<option value="">Selecione uma Lista...</option>';
-                    lists.forEach(list => {
-                        const option = document.createElement('option');
-                        option.value = list.id;
-                        option.textContent = list.name;
-                        if (list.id === savedListId) {
-                            option.selected = true;
-                        }
-                        listSelect.appendChild(option);
-                    });
-                    listSelect.disabled = false;
-                });
-        }
-        
-        boardSelect.addEventListener('change', fetchAndSetTrelloLists);
-        if (boardSelect.value) {
-            fetchAndSetTrelloLists();
+      const boardSelect = document.getElementById('trello-board-select');
+      const listSelect = document.getElementById('trello-list-select');
+      const savedListId = "{{ campanha.trello_list_id or '' }}";
+
+      function fetchAndSetTrelloLists() {
+        const boardId = boardSelect.value;
+        listSelect.innerHTML = '<option value="">Carregando...</option>';
+        listSelect.disabled = true;
+
+        if (!boardId) {
+          listSelect.innerHTML = '<option value="">Aguardando seleção do Board...</option>';
+          return;
         }
 
-        // --- LÓGICA DO AGENDAMENTO ---
-        const scheduleType = document.getElementById('schedule-type');
-        const weeklyOptions = document.getElementById('weekly-options');
-        const monthlyOptions = document.getElementById('monthly-options');
-        const timeOptions = document.getElementById('time-options');
-        const allScheduleInputs = document.querySelectorAll('#weekly-options select, #monthly-options input, #time-options input');
-        const initialCron = "{{ campanha.periodicidade_cron or '' }}";
+        fetch(`/get_trello_lists/${boardId}`)
+          .then(response => response.json())
+          .then(lists => {
+            listSelect.innerHTML = '<option value="">Selecione uma Lista...</option>';
+            lists.forEach(list => {
+              const option = document.createElement('option');
+              option.value = list.id;
+              option.textContent = list.name;
+              if (list.id === savedListId) {
+                option.selected = true;
+              }
+              listSelect.appendChild(option);
+            });
+            listSelect.disabled = false;
+          });
+      }
 
-        function updateScheduleVisibility() {
-            weeklyOptions.style.display = 'none'; monthlyOptions.style.display = 'none'; timeOptions.style.display = 'none';
-            const type = scheduleType.value;
-            if (type === 'daily') timeOptions.style.display = 'block';
-            else if (type === 'weekly') { weeklyOptions.style.display = 'block'; timeOptions.style.display = 'block'; }
-            else if (type === 'monthly') { monthlyOptions.style.display = 'block'; timeOptions.style.display = 'block'; }
+      boardSelect.addEventListener('change', fetchAndSetTrelloLists);
+      if (boardSelect.value) {
+        fetchAndSetTrelloLists();
+      }
+
+      const scheduleType = document.getElementById('schedule-type');
+      const weeklyOptions = document.getElementById('weekly-options');
+      const monthlyOptions = document.getElementById('monthly-options');
+      const timeOptions = document.getElementById('time-options');
+      const allScheduleInputs = document.querySelectorAll('#weekly-options select, #monthly-options input, #time-options input');
+      const initialCron = "{{ campanha.periodicidade_cron or '' }}";
+
+      function updateScheduleVisibility() {
+        weeklyOptions.style.display = 'none';
+        monthlyOptions.style.display = 'none';
+        timeOptions.style.display = 'none';
+        const type = scheduleType.value;
+        if (type === 'daily') {
+          timeOptions.style.display = 'block';
+        } else if (type === 'weekly') {
+          weeklyOptions.style.display = 'block';
+          timeOptions.style.display = 'block';
+        } else if (type === 'monthly') {
+          monthlyOptions.style.display = 'block';
+          timeOptions.style.display = 'block';
+        }
+      }
+
+      function generateCronString() {
+        const type = scheduleType.value;
+        const cronOutput = document.getElementById('cron-output');
+        const cronPreview = document.getElementById('cron-preview');
+
+        if (type === 'none') {
+          cronOutput.value = '';
+          cronPreview.textContent = '';
+          return;
         }
 
-        function generateCronString() {
-            const type = scheduleType.value;
-            const cronOutput = document.getElementById('cron-output');
-            const cronPreview = document.getElementById('cron-preview');
-            if (type === 'none') {
-                cronOutput.value = ''; cronPreview.textContent = ''; return;
-            }
-            const time = document.getElementById('schedule-time').value.split(':');
-            const minute = time[1]; const hour = time[0];
-            let dayOfMonth = '*', month = '*', dayOfWeek = '*', previewText = '';
-            if (type === 'daily') {
-                previewText = `Será executado diariamente às ${hour}:${minute}.`;
-            } else if (type === 'weekly') {
-                dayOfWeek = document.getElementById('schedule-weekday').value;
-                const weekdayText = document.getElementById('schedule-weekday').options[document.getElementById('schedule-weekday').selectedIndex].text;
-                previewText = `Será executado toda ${weekdayText} às ${hour}:${minute}.`;
-            } else if (type === 'monthly') {
-                dayOfMonth = document.getElementById('schedule-day-month').value;
-                previewText = `Será executado todo dia ${dayOfMonth} de cada mês às ${hour}:${minute}.`;
-            }
-            const cronString = `${minute} ${hour} ${dayOfMonth} ${month} ${dayOfWeek}`;
-            cronOutput.value = cronString;
-            cronPreview.textContent = `Prévia: ${previewText}`;
-        }
-        
-        function parseCronAndSetInputs(cronString) {
-            if (!cronString || cronString.trim() === '') {
-                scheduleType.value = 'none';
-                return;
-            }
-            const parts = cronString.split(' ');
-            const minute = parts[0]; const hour = parts[1];
-            const dayOfMonth = parts[2]; const dayOfWeek = parts[4];
+        const time = document.getElementById('schedule-time').value.split(':');
+        const minute = time[1];
+        const hour = time[0];
+        let dayOfMonth = '*', month = '*', dayOfWeek = '*', previewText = '';
 
-            if (dayOfMonth !== '*' && dayOfWeek === '*') {
-                scheduleType.value = 'monthly';
-                document.getElementById('schedule-day-month').value = dayOfMonth;
-            } else if (dayOfWeek !== '*' && dayOfMonth === '*') {
-                scheduleType.value = 'weekly';
-                document.getElementById('schedule-weekday').value = dayOfWeek;
-            } else if (dayOfMonth === '*' && dayOfWeek === '*') {
-                scheduleType.value = 'daily';
-            }
-            document.getElementById('schedule-time').value = `${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
+        if (type === 'daily') {
+          previewText = `Será executado diariamente às ${hour}:${minute}.`;
+        } else if (type === 'weekly') {
+          dayOfWeek = document.getElementById('schedule-weekday').value;
+          const weekdaySelect = document.getElementById('schedule-weekday');
+          const weekdayText = weekdaySelect.options[weekdaySelect.selectedIndex].text;
+          previewText = `Será executado toda ${weekdayText} às ${hour}:${minute}.`;
+        } else if (type === 'monthly') {
+          dayOfMonth = document.getElementById('schedule-day-month').value;
+          previewText = `Será executado todo dia ${dayOfMonth} de cada mês às ${hour}:${minute}.`;
         }
+        const cronString = `${minute} ${hour} ${dayOfMonth} ${month} ${dayOfWeek}`;
+        cronOutput.value = cronString;
+        cronPreview.textContent = `Expressão CRON: ${cronString} (${previewText})`;
+      }
 
-        scheduleType.addEventListener('change', () => { updateScheduleVisibility(); generateCronString(); });
-        allScheduleInputs.forEach(input => input.addEventListener('change', generateCronString));
-        
-        renumberTemplates();
-        parseCronAndSetInputs(initialCron);
+      function parseCronAndSetInputs(cronString) {
+        if (!cronString || cronString.trim() === '') {
+          scheduleType.value = 'none';
+          return;
+        }
+        const parts = cronString.split(' ');
+        const minute = parts[0];
+        const hour = parts[1];
+        const dayOfMonth = parts[2];
+        const dayOfWeek = parts[4];
+
+        if (dayOfMonth !== '*' && dayOfWeek === '*') {
+          scheduleType.value = 'monthly';
+          document.getElementById('schedule-day-month').value = dayOfMonth;
+        } else if (dayOfWeek !== '*' && dayOfMonth === '*') {
+          scheduleType.value = 'weekly';
+          document.getElementById('schedule-weekday').value = dayOfWeek;
+        } else if (dayOfMonth === '*' && dayOfWeek === '*') {
+          scheduleType.value = 'daily';
+        }
+        document.getElementById('schedule-time').value = `${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
+      }
+
+      scheduleType.addEventListener('change', () => {
         updateScheduleVisibility();
         generateCronString();
+      });
+      allScheduleInputs.forEach(input => input.addEventListener('change', generateCronString));
+
+      renumberTemplates();
+      parseCronAndSetInputs(initialCron);
+      updateScheduleVisibility();
+      generateCronString();
     });
-</script>
+  </script>
 </body>
 </html>

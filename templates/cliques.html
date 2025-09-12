@@ -55,7 +55,7 @@
               <th>Estado</th>
               <th>País</th>
               <th>Ver no Mapa</th>
-              {# Nova coluna #}
+              
               <th>Link Original</th>
               <th>Referer</th>
             </tr>
@@ -75,8 +75,7 @@
               <td>{{ clique.pais }}</td>
               <td>
                 {% if clique.Maps_link != 'N/A' %}
-                <a href="{{ clique.Maps_link }}" target="_blank">Mapa</a> {#
-                Exibe o link #} {% else %} N/A {% endif %}
+                <a href="{{ clique.Maps_link }}" target="_blank">Mapa</a>  {% else %} N/A {% endif %}
               </td>
               <td>
                 <a href="{{ clique.link_original }}" target="_blank"
